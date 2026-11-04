@@ -1,0 +1,25 @@
+name: MYCA Shop Sprint 01 static checks
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'app/**'
+      - 'api/**'
+      - 'admin/**'
+      - 'assets/**'
+      - 'scripts/**'
+      - 'tests/**'
+      - '.github/workflows/**'
+  push:
+    branches: ['feat/sprint-01-commerce-core']
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: PHP and Node static checks
+        run: |
+          php -v
+          node -v
+          bash tests/static-check.sh
