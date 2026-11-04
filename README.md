@@ -1,18 +1,79 @@
-# MYCA Shop — فروشگاه مایکا
+# MYCA Shop — Sprint 01: Commerce Foundation
 
-## Deployment preview
+فروشگاه مایکا | نسخه آزمایشی `shop.mycablog.dandoonii.ir` با طراحی هماهنگ مجله مایکا.
 
-This repo contains the self-contained static MYCA Shop editorial prototype in `index.html` (based on MYCA Magazine design language). It is prepared for a Vercel **static** project with target custom domain `shop.dandoonii.ir`.
+## محدوده واقعی این اسپرینت
 
-**Demo only — NOT a production ecommerce system:** no actual checkout, payment, database, user authentication, server-side admin, inventory, shipping, or orders. Demo data is stored in the local browser, and admin features are not protected. Do not enter personal or payment information.
+- **انجام شده در کد:** پایگاه داده مستقل MySQL، API خواندن کاتالوگ، API محافظت‌شده مدیریت کالا و دسته‌بندی، پنل مدیریتی سروری با ورود/خروج، هش رمز، CSRF، محدودسازی تلاش‌های ورود، بارگذاری ایمن تصویر، ثبت رویداد و دریافت خودکار داده فروشگاه از API.
+- **حفظ شده:** تمام استایل‌ها و جریان نمایش فعلی فروشگاه؛ سبد خرید و لندینگ از نسخه نمایشی قبلی حفظ می‌شوند.
+- **هنوز نمایشی:** سبد خرید، ثبت و پیگیری سفارش، هویت مشتری، موجودی هم‌زمان، پرداخت، حمل‌ونقل، بازگشت وجه، مدیریت لندینگ و کتابخانه ویدیو. **فرم ثبت سفارش غیرفعال شده است.** برای فروش واقعی استفاده نکنید.
+- **محدودیت تست:** اعتبارسنجی PHP و JavaScript انجام شده؛ تست انتهابه‌انتهای MySQL روی هاست پارس‌پک هنوز باید پس از اتصال واقعی دیتابیس انجام شود.
 
-All pages are `noindex` through meta tags, HTTP response headers (`vercel.json`) and `robots.txt` until a real production system is ready.
+## معماری
 
-### Connect
+```text
+index.html          ویترین سابق با طراحی ثابت + واکشی عمومی از api/catalog.php
+admin/index.php     پوسته پنل؛ هیچ اطلاعات مدیریتی را در HTML پیش‌فرض افشا نمی‌کند
+assets/admin.js     رابط مدیریت دسته/کالا، ورود و آپلود
+api/catalog.php     GET عمومی فقط کالاهای منتشرشده و دسته‌های فعال
+api/admin.php       JSON API مدیریتی + نشست + CSRF
+app/bootstrap.php   اتصال PDO، احراز هویت، اعتبارسنجی، هندل خطا
+app/config.local.php تنظیمات محرمانه DB، خارج Git و مسدودشده از HTTP
+db/install.sql      ساخت جداول + داده‌های صریحاً آزمایشی
+scripts/create-admin.php ساخت/تغییر رمز ادمین، فقط در PHP CLI
+uploads/            تصاویر مجاز، با محدودیت اجرا در Apache
+```
 
-1. Import `kodsaeid-cmd/myca-shop` as a project on Vercel with framework `Other` and no build step.
-2. Verify the production preview deployment; assign `shop.dandoonii.ir` through project Domains.
-3. Create the DNS record exactly as advised by Vercel in the authoritative DNS provider, then verify the custom domain and HTTPS.
-4. Do not replace DNS records for magazine or any other deployed service.
+## راه‌اندازی روی هاست پارس‌پک (cPanel)
 
-`MYCA_DESIGN_LANGUAGE_v1.0` is the visual reference; this is a UI/interaction preview, not a production transactional stack.
+**هشدار:** مخزن مجله و پایگاه داده مجله را **تغییر ندهید**. ابتدا پوشه فروشگاه را بک‌آپ بگیرید. دامنه آزمایشی فروشگاه `shop.mycablog.dandoonii.ir` است.
+
+1. در cPanel > **MySQL Databases** یک دیتابیس جدید مستقل فروشگاه و یک یوزر محدود به همان دیتابیس بسازید. یوزر را به DB اضافه کنید و دسترسی‌های لازم برای CRUD را بدهید. اطلاعات را فقط در cPanel نگه دارید.
+2. در **phpMyAdmin** همین دیتابیس جدید را انتخاب و `db/install.sql` را **یک بار** Import کنید. هشت محصول و هشت دسته نمونه وارد می‌شوند؛ این‌ها کالا و قیمت واقعی نیستند.
+3. **Select PHP Version** را بررسی کنید: PHP `8.1+`، افزونه‌های `pdo_mysql` و `fileinfo` فعال باشند. بک‌اند با MySQL/MariaDB کار می‌کند.
+4. در مسیر `app/` فایلی به نام `config.local.php` از روی `config.example.php` بسازید و نام دیتابیس، نام کاربری، رمز و میزبان MySQL را وارد کنید؛ این فایل در Git نیست و نباید منتشر شود. سطح دسترسی معمول `0600` یا `0640` در صورت پشتیبانی هاست.
+5. کل پوشه‌های نسخه اسپرینت شامل `app`, `api`, `admin`, `assets`, `db`, `scripts`, `tests`, `uploads` و `index.html` را در **Document Root مخصوص فروشگاه** آپلود کنید. **فایل `.htaccess` موجود روی هاست را پاک یا بدون بررسی بازنویسی نکنید**؛ قوانین امنیتی `.htaccess` پروژه را با قوانین فعلی هاست ادغام کنید تا اعتبارسنجی SSL و تنظیمات cPanel آسیب نبینند. فقط فایل `index.html` کافی نیست. پوشه مجله را پاک یا جابه‌جا نکنید. محتویات قبلی `uploads` را حفظ کنید.
+6. ابتدا HTTPS معتبر روی دامنه فعال کنید. **پیش از فعال‌شدن SSL، حساب مدیریت را از طریق مرورگر تست نکنید و اطلاعات واقعی وارد نکنید.**
+7. از ترمینال cPanel در ریشه فروشگاه اجرا کنید: `php scripts/create-admin.php admin@example.com`. رمز مدیر حداقل ۱۲ نویسه است و به‌صورت تعاملی دریافت می‌شود؛ **رمز را در دستورات shell یا گفت‌وگو قرار ندهید**. اگر Terminal در دسترس نیست، از پشتیبانی پارس‌پک برای اجرای امن CLI یا روش امنِ ایجاد حساب بدون افشای رمز کمک بگیرید؛ endpoint نصب عمومی وجود ندارد.
+8. در مرورگر `https://shop.mycablog.dandoonii.ir/api/catalog.php` را باز کنید و وجود `"ok":true` و دو آرایه `categories` و `products` را بررسی کنید.
+9. `https://shop.mycablog.dandoonii.ir/admin/` را باز کنید، وارد شوید، یک محصول آزمایشی بسازید و در دو مرورگر مختلف ببینید. تغییرات باید سراسری باشند.
+
+### نکات انتشار
+
+- این شاخه **Feature/PR** است. تا زمان نصب دیتابیس و بررسی هاست، روی سایت آزمایشی موجود جایگزین نشده است.
+- ویترین در صورت خطای API به داده‌های نمایشی محلی بازمی‌گردد تا پیش‌نمایش فعلی نشکند. بنابراین **وجود کالا در صفحه، اثبات اتصال DB نیست**؛ حتماً endpoint API را تست کنید.
+- تصاویری که در نسخه ابتدایی به‌صورت `data:` داخل HTML قرار داشتند، فقط برای محصولات نمونه قدیمی در مرورگر به‌صورت fallback نمایش داده می‌شوند؛ تصاویر محصولات جدید باید از پنل آپلود شوند یا آدرس HTTPS داشته باشند.
+- `.htaccess` پوشه‌های `app`, `db`, `scripts`, `tests` دسترسی عمومی را منع می‌کند و در `uploads/` اجرای فایل‌های اسکریپت محدود شده است. در صورت استفاده از Nginx بدون Apache، این محدودیت‌ها باید در وب‌سرور هم پیاده شوند.
+- برای نصب و تست امن، Cloudflare را در حالت SSL/TLS **Full (strict)** و هاست را با SSL معتبر تنظیم کنید؛ حالت Flexible توصیه نمی‌شود.
+- API عمومی فقط کالاها و دسته‌های قابل نمایش را ارائه می‌کند. منبع حقیقت قیمت و موجودی، پایگاه داده سرور است؛ موجودی فعلی هنوز رزرو/کاهش واقعی هنگام خرید ندارد.
+- URL ویدیوی محصول از پنل قابل ذخیره است، ولی آپلود سروری **ویدیو** در این اسپرینت پیاده نشده است. فقط تصویر JPG/PNG/WebP/GIF تا ۴ مگابایت آپلود می‌شود.
+
+## کنترل‌های امنیتی
+
+- SQL با PDO و Prepared Statements؛ رمز با `password_hash`/`password_verify`
+- نشست مدیر با `HttpOnly`, `SameSite=Strict`, شناسه تجدیدشده بعد از ورود، کوکی `Secure` روی HTTPS
+- CSRF Token برای تمام درخواست‌های تغییر و حتی ورود، محدودسازی تلاش ورود در DB
+- محدودیت اندازه و MIME تصویر با `finfo`/`getimagesize` و نام فایل تصادفی
+- شناسه/نامک یکتا، اعتبارسنجی قیمت، موجودی، روابط والد و جلوگیری از چرخه دسته‌ها
+- جلوگیری از ایندکس‌شدن نسخه نمایشی
+
+## چک‌لیست پذیرش Sprint 01
+
+- [ ] ساخت دیتابیس و ادمین روی پارس‌پک
+- [ ] `GET /api/catalog.php` کاتالوگ SQL را نمایش دهد
+- [ ] ورود نامعتبر رد، ورود معتبر پذیرفته، خروج نشست را باطل کند
+- [ ] بدون ورود، عملیات `bootstrap/save/delete/upload` با `401` رد شوند
+- [ ] بدون CSRF معتبر، عملیات تغییر با `419` رد شوند
+- [ ] ایجاد/ویرایش/حذف دسته و کالا، ذخیره دائمی و نمایش در مرورگر دوم
+- [ ] جلوگیری از حذف دسته دارای کالا یا زیرمجموعه
+- [ ] آپلود تصویر سالم و جلوگیری از آپلود فایل PHP/SVG
+- [ ] تم موجود فروشگاه روی موبایل و دسکتاپ بدون شکست باقی بماند
+- [ ] وجود SSL معتبر پیش از ورود اطلاعات واقعی
+
+## تست‌های اولیه کد
+
+در محیطی با PHP و Node.js: `bash tests/static-check.sh`.
+
+## مرحله بعد
+
+Sprint 02: CMS و صفحه‌ساز سروری، مدیریت رسانه و ویدیو، تنوع کالا/SKU و سطح دسترسی پیشرفته. سپس موتور سفارش/پرداخت در Sprint 03.
