@@ -115,13 +115,17 @@ try {
  if($action==='order.fulfillment'){
   $id=cp_int($v['id']??0,1);$state=$v['status']??'';$states=['unfulfilled','picking','packed','shipped','delivered','delivery_failed','returned'];
   if(!in_array($state,$states,true))shop_error('وضعیت ارسال نامعتبر است.');$db->beginTransaction();
-  $q=$db->prepare('SELECT fulfillment_status FROM shop_orders WHERE id=? FOR UPDATE');$q->execute([$id]);$old=$q->fetchColumn();if($old===false)shop_error('سفارش پیدا نشد.',404);
+  $q=$db->prepare('SELECT fulfillment_status,payment_status,sandbox FROM shop_orders WHERE id=? FOR UPDATE');$q->execute([$id]);$row=$q->fetch();if(!$row)shop_error('سفارش پیدا نشد.',404);
+  if(!(int)$row['sandbox'] && $row['payment_status']!=='paid' && $state!=='unfulfilled')shop_error('سفارش پرداخت‌نشده نمی‌تواند وارد عملیات ارسال شود.',409);
+  $old=$row['fulfillment_status'];
   $db->prepare('UPDATE shop_orders SET fulfillment_status=? WHERE id=?')->execute([$state,$id]);
   $db->prepare('INSERT INTO shop_order_events(order_id,dimension,from_status,to_status,actor,note) VALUES(?,"fulfillment",?,?,?,?)')->execute([$id,$old,$state,$actor,cp_text($v['note']??'',1000)]);
   shop_audit($db,$actor,'status','order',(string)$id);$db->commit();shop_json(['ok'=>true]);
  }
  if($action==='shipment.save'){
   $id=cp_int($v['order_id']??0,1);$carrier=cp_text($v['carrier']??'',120,true);$track=cp_text($v['tracking_code']??'',120,true);
+  $q=$db->prepare('SELECT payment_status,sandbox FROM shop_orders WHERE id=?');$q->execute([$id]);$order=$q->fetch();if(!$order)shop_error('سفارش پیدا نشد.',404);
+  if(!(int)$order['sandbox'] && $order['payment_status']!=='paid')shop_error('برای مرسوله واقعی، پرداخت باید توسط درگاه تأیید شده باشد.',409);
   $db->prepare('INSERT INTO shop_shipments(order_id,carrier,tracking_code,status,shipped_at) VALUES(?,?,?,"shipped",NOW())')->execute([$id,$carrier,$track]);
   shop_audit($db,$actor,'save','shipment',(string)$id);shop_json(['ok'=>true]);
  }
