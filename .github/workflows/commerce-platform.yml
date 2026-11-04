@@ -1,0 +1,17 @@
+name: MYCA Shop Commerce Platform Static Tests
+on:
+  push:
+    branches: ['feat/commerce-platform-*']
+  pull_request:
+    paths: ['api/**','app/**','assets/**','db/**','admin/**','product/**','account/**','tests/**','index.html','index.php','.github/workflows/commerce-platform.yml']
+permissions:
+  contents: read
+jobs:
+  static-check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Check runner dependencies
+        run: php -v && node -v && python3 --version
+      - name: Static checks
+        run: bash tests/commerce-static-check.sh
