@@ -97,7 +97,7 @@ function shop_text(mixed $value, int $max, string $field, bool $required = false
 {
     if (!is_string($value) && !is_numeric($value)) shop_error("فیلد {$field} نامعتبر است.");
     $value = trim((string)$value);
-    if (($required && $value === '') || strlen($value) > $max) shop_error("فیلد {$field} نامعتبر است.");
+    if (($required && $value === '') || !preg_match('//u', $value) || preg_match_all('/./us', $value) > $max) shop_error("فیلد {$field} نامعتبر است.");
     return $value;
 }
 
