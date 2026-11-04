@@ -120,8 +120,13 @@ try {
             shop_text($v['description'] ?? '', 20000, 'توضیحات'),shop_text($v['specs'] ?? '', 12000, 'مشخصات'),
             !empty($v['published']) ? 1 : 0,!empty($v['featured']) ? 1 : 0];
         $db->beginTransaction();
-        $q = $db->prepare('SELECT id FROM shop_products WHERE id=? FOR UPDATE'); $q->execute([$id]);
-        if ($q->fetch()) {
+        $q = $db->prepare('SELECT id,slug FROM shop_products WHERE id=? FOR UPDATE'); $q->execute([$id]);
+        $previousProduct=$q->fetch();
+        if ($previousProduct) {
+            if((string)$previousProduct['slug']!==$payload[2]){
+                $redirect=$db->prepare('INSERT INTO shop_seo_redirects(old_path,new_path) VALUES(?,?) ON DUPLICATE KEY UPDATE new_path=VALUES(new_path)');
+                $redirect->execute(['/product/'.$previousProduct['slug'].'/','/product/'.$payload[2].'/']);
+            }
             $q=$db->prepare('UPDATE shop_products SET name=?,slug=?,sku=?,category_id=?,price=?,compare_price=?,stock=?,emoji=?,image_url=?,gallery_json=?,video_url=?,description=?,specs=?,published=?,featured=? WHERE id=?');
             $q->execute(array_merge(array_slice($payload,1),[$id]));
         } else {

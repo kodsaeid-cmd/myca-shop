@@ -1,0 +1,7 @@
+For MYCA Shop ONLY. Back up existing /home/mycabl/shop.mycablog.dandoonii.ir/.htaccess.
+After testing MySQL/API and publishing CMS home, safely merge this into the existing shop root .htaccess:
+DirectoryIndex index.php index.html
+
+Do NOT replace cPanel's existing .htaccess outright or modify the Magazine's document root.
+The index.php bootstrap falls back to the original index.html until the home page is published.
+Install the admin/.htaccess file containing "DirectoryIndex index.php" to prevent 403 on /admin/.

@@ -1,0 +1,5 @@
+<?php
+declare(strict_types=1);
+require_once __DIR__.'/../app/view.php';
+cp_public_header('حساب کاربری من','سفارش‌ها، آدرس‌ها و پشتیبانی شخصی مشتری مایکا');
+?><section class="account-layout" data-page="account"><aside class="account-nav" aria-label="منوی مشتری"><button class="active" data-account-tab="overview">داشبورد</button><button data-account-tab="profile">پروفایل</button><button data-account-tab="addresses">آدرس‌های من</button><button data-account-tab="orders">سفارش‌های من</button><button data-account-tab="wishlist">علاقه‌مندی‌ها</button><button data-account-tab="reviews">نظرات من</button><button data-account-tab="returns">مرجوعی‌ها</button><button data-account-tab="tickets">پشتیبانی</button><button data-account-tab="consent">اعلان‌ها</button></aside><div class="account-content"><div class="panel" id="account-panel"><h1>حساب کاربری مایکا</h1><p class="placeholder">برای مشاهده حساب ابتدا باید اتصال امن و قابلیت ورود فعال باشند.</p></div><div id="account-message" aria-live="polite"></div></div></section><?php cp_public_footer(); ?>

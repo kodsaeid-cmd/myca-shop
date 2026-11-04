@@ -1,0 +1,2 @@
+<?php
+declare(strict_types=1);require_once __DIR__.'/../app/view.php';cp_public_header('سبد خرید','مدیریت سبد خرید فروشگاه مایکا');?><nav class="breadcrumbs"><a href="/">خانه</a> / سبد خرید</nav><h1>سبد خرید شما</h1><section class="cart-layout" data-page="cart"><div class="panel" id="cart-panel"><p class="placeholder">در حال دریافت سبد خرید از سرور...</p></div><aside class="panel cart-sidebar" id="cart-total"><h2>خلاصه سفارش</h2><p>قیمت نهایی در سرور محاسبه می‌شود.</p></aside></section><?php cp_public_footer(); ?>

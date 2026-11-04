@@ -1,0 +1,6 @@
+DirectoryIndex index.php
+Options -Indexes
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule ^([a-z0-9]+(?:-[a-z0-9]+)*)/?$ index.php?slug=$1 [L,QSA,NC]
+</IfModule>

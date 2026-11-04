@@ -1,0 +1,2 @@
+<?php
+declare(strict_types=1);require_once __DIR__.'/../app/view.php';cp_public_header('پیگیری سفارش','مشاهده وضعیت ارسال و تحویل سفارش مایکا');?><section class="block-section content-panel"><h1>پیگیری سفارش</h1><p>اطلاعات سفارش فقط پس از ورود امن به حساب خریدار نمایش داده می‌شود. شناسه سفارش به‌تنهایی مجوز مشاهده مشخصات مشتری نیست.</p><p>برای مشاهده وضعیت سفارش به <a class="muted-link" href="/account/">سفارش‌های من</a> بروید.</p></section><?php cp_public_footer(); ?>
